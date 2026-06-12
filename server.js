@@ -36,6 +36,23 @@ function sendJson(response, status, payload) {
   response.end(JSON.stringify(payload));
 }
 
+function getCacheControl(filePath) {
+  if (filePath.endsWith("index.html")) {
+    return "no-cache";
+  }
+
+  if (filePath.includes("/assets/")) {
+    return "public, max-age=31536000, immutable";
+  }
+
+  const extension = extname(filePath);
+  if ([".css", ".js", ".woff", ".woff2"].includes(extension)) {
+    return "public, max-age=31536000, immutable";
+  }
+
+  return "public, max-age=3600";
+}
+
 async function readJsonBody(request) {
   const chunks = [];
   for await (const chunk of request) {
@@ -125,6 +142,7 @@ async function serveStatic(request, response) {
     await readFile(filePath);
     response.writeHead(200, {
       "Content-Type": mimeTypes[extname(filePath)] || "application/octet-stream",
+      "Cache-Control": getCacheControl(filePath),
     });
     createReadStream(filePath).pipe(response);
   } catch {

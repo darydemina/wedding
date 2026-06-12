@@ -21,7 +21,7 @@ const ASSETS = {
   clinkLight: "/assets/mirrored/images/photo-08d221af1f.svg",
   augustHeart: "/assets/mirrored/images/Frame_1321317137-55afa968d6.svg",
   augustFlowers: "/assets/mirrored/images/image_1738-aafb09438d.png",
-  locationBeliyPrichal: "/assets/custom/beliy-prichal-location.png",
+  locationBeliyPrichal: "/assets/custom/beliy-prichal-location-optimized.jpg",
   locationRings: "/assets/mirrored/images/Frame_1321316900-0dc5c38db4.png",
   locationDinner: "/assets/mirrored/images/Frame_1321317164-b5247cf801.png",
   dressBranchLeft: "/assets/mirrored/images/image_1736-8fb6067b5b.png",
@@ -95,6 +95,27 @@ const SILK_SWATCHES = [
   { src: ASSETS.silkOlive, className: "silk silk-6" },
   { src: ASSETS.silkTaupe, className: "silk silk-7" },
   { src: ASSETS.silkIvory, className: "silk silk-8" },
+];
+
+const IMAGE_PRELOADS_AFTER_OPEN = [
+  ASSETS.glassLeft,
+  ASSETS.glassRight,
+  ASSETS.tornCreamTop,
+  ASSETS.tornGreenTop,
+  ASSETS.tornCreamLarge,
+  ASSETS.tornGreenLarge,
+  ASSETS.leafStrip,
+  ASSETS.rsvpTorn,
+  ASSETS.shadowPalm,
+  ASSETS.augustBranch,
+  ASSETS.augustFlowers,
+  ASSETS.locationBeliyPrichal,
+  ASSETS.dressBranchLeft,
+  ASSETS.dressBranchRight,
+  ASSETS.chatLeaf,
+  ASSETS.guestPhone,
+  ASSETS.contactsRock,
+  ASSETS.closingPhoto,
 ];
 
 function getCountdown() {
@@ -193,15 +214,34 @@ function useScrollMotion(enabled) {
   }, [enabled]);
 }
 
+function useImagePreloader(enabled) {
+  useEffect(() => {
+    if (!enabled) {
+      return undefined;
+    }
+
+    const handles = IMAGE_PRELOADS_AFTER_OPEN.map((src) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = src;
+      return image;
+    });
+
+    return () => {
+      handles.length = 0;
+    };
+  }, [enabled]);
+}
+
 function Divider({ src, className = "" }) {
-  return <img className={`section-divider ${className}`.trim()} src={src} alt="" aria-hidden="true" loading="lazy" />;
+  return <img className={`section-divider ${className}`.trim()} src={src} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high" />;
 }
 
 function DressDetailsTransition() {
   return (
     <section className="transition-strip dress-details-transition" aria-hidden="true">
       <span className="transition-fill" />
-      <img className="transition-image transition-dress-details" src={ASSETS.tornGreenTop} alt="" loading="lazy" />
+      <img className="transition-image transition-dress-details" src={ASSETS.tornGreenTop} alt="" loading="eager" decoding="async" fetchPriority="high" />
     </section>
   );
 }
@@ -209,8 +249,8 @@ function DressDetailsTransition() {
 function DetailsRsvpTransition() {
   return (
     <section className="transition-strip details-rsvp-transition" aria-hidden="true">
-      <img className="transition-shadow transition-rsvp-shadow" src={ASSETS.shadowPalm} alt="" loading="lazy" />
-      <img className="transition-image transition-details-rsvp" src={ASSETS.rsvpTorn} alt="" loading="lazy" />
+      <img className="transition-shadow transition-rsvp-shadow" src={ASSETS.shadowPalm} alt="" loading="eager" decoding="async" fetchPriority="high" />
+      <img className="transition-image transition-details-rsvp" src={ASSETS.rsvpTorn} alt="" loading="eager" decoding="async" fetchPriority="high" />
     </section>
   );
 }
@@ -223,7 +263,9 @@ function LeafTransition({ className = "", rotated = false, cream = false }) {
         className={`transition-image transition-leaf ${rotated ? "is-rotated" : ""}`.trim()}
         src={ASSETS.leafStrip}
         alt=""
-        loading="lazy"
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
       />
     </section>
   );
@@ -232,7 +274,7 @@ function LeafTransition({ className = "", rotated = false, cream = false }) {
 function RsvpChatTransition() {
   return (
     <section className="transition-strip rsvp-chat-transition" aria-hidden="true">
-      <img className="transition-image transition-rsvp-chat" src={ASSETS.tornCreamLarge} alt="" loading="lazy" />
+      <img className="transition-image transition-rsvp-chat" src={ASSETS.tornCreamLarge} alt="" loading="eager" decoding="async" fetchPriority="high" />
     </section>
   );
 }
@@ -241,7 +283,7 @@ function FinalCreamTransition() {
   return (
     <section className="transition-strip final-cream-transition" aria-hidden="true">
       <span className="transition-final-fill" />
-      <img className="transition-image transition-final-cream" src={ASSETS.tornCreamLarge} alt="" loading="lazy" />
+      <img className="transition-image transition-final-cream" src={ASSETS.tornCreamLarge} alt="" loading="eager" decoding="async" fetchPriority="high" />
     </section>
   );
 }
@@ -253,21 +295,21 @@ function Intro({ phase, onOpen }) {
     <section className="intro" aria-label="Первый экран приглашения">
       <div className="intro-art">
         <div className="intro-card" aria-hidden={!envelopeOpened}>
-          <img className="scene-bg" src={ASSETS.meadow} alt="" />
-          <img className="photo photo-maria" src={ASSETS.photoAlexey} alt="" />
-          <img className="photo photo-alexey" src={ASSETS.photoMaria} alt="" />
+          <img className="scene-bg" src={ASSETS.meadow} alt="" loading="eager" decoding="async" fetchPriority="high" />
+          <img className="photo photo-maria" src={ASSETS.photoAlexey} alt="" loading="eager" decoding="async" fetchPriority="high" />
+          <img className="photo photo-alexey" src={ASSETS.photoMaria} alt="" loading="eager" decoding="async" fetchPriority="high" />
           <p className="caption caption-left">— интересно, кто будет моей<br />женой, когда я вырасту?</p>
           <p className="caption caption-right">— ей буду я ❤</p>
-          <img className="names-mark" src={ASSETS.names} alt="Дарья Даниил" />
-          <img className="tiny-star" src={ASSETS.star} alt="" data-scroll-motion="spin" />
+          <img className="names-mark" src={ASSETS.names} alt="Дарья Даниил" loading="eager" decoding="async" fetchPriority="high" />
+          <img className="tiny-star" src={ASSETS.star} alt="" loading="eager" decoding="async" data-scroll-motion="spin" />
         </div>
 
         <div className="intro-envelope" aria-hidden="true">
           <div className="side-hand side-hand-left" />
           <div className="side-hand side-hand-right" />
           <div className="cover"></div>
-          <img className="bottom-flap" src={ASSETS.bottomFlap} alt="" />
-          <img className="top-flap" src={ASSETS.topFlap} alt="" />
+          <img className="bottom-flap" src={ASSETS.bottomFlap} alt="" loading="eager" decoding="async" fetchPriority="high" />
+          <img className="top-flap" src={ASSETS.topFlap} alt="" loading="eager" decoding="async" fetchPriority="high" />
         </div>
 
         <h1 className="cover-title">ПРИГЛАШЕНИЕ<br />НА СВАДЬБУ</h1>
@@ -288,9 +330,9 @@ function DearSection() {
   return (
     <section id="odinstart" className="invite-section section-green dear-section reveal">
       <div className="dear-stage" aria-hidden="true">
-        <img src={ASSETS.starAlt} alt="" className="dear-star" loading="lazy" data-scroll-motion="spin" />
-        <img src={ASSETS.glassLeft} alt="" className="dear-glass dear-glass-left" loading="lazy" data-scroll-motion="dear-left" />
-        <img src={ASSETS.glassRight} alt="" className="dear-glass dear-glass-right" loading="lazy" data-scroll-motion="dear-right" />
+        <img src={ASSETS.starAlt} alt="" className="dear-star" loading="eager" decoding="async" data-scroll-motion="spin" />
+        <img src={ASSETS.glassLeft} alt="" className="dear-glass dear-glass-left" loading="eager" decoding="async" fetchPriority="high" data-scroll-motion="dear-left" />
+        <img src={ASSETS.glassRight} alt="" className="dear-glass dear-glass-right" loading="eager" decoding="async" fetchPriority="high" data-scroll-motion="dear-right" />
       </div>
       <div className="section-inner dear-copy-group">
         <p className="section-script">Дорогие</p>
@@ -309,11 +351,11 @@ function AugustSection() {
   return (
     <section className="invite-section section-cream august-section reveal">
       <Divider src={ASSETS.tornGreenTop} className="divider-top divider-top-green" />
-      <img src={ASSETS.augustBranch} alt="" className="august-branch" loading="lazy" />
+      <img src={ASSETS.augustBranch} alt="" className="august-branch" loading="eager" decoding="async" />
       <div className="section-inner">
-        <img src={ASSETS.clinkDark} alt="" className="august-arrow august-arrow-mini" loading="lazy" />
-        <img src={ASSETS.augustLine} alt="" className="august-line" loading="lazy" />
-        <img src={ASSETS.augustFlowers} alt="" className="august-wood" loading="lazy" data-scroll-motion="drift-left" />
+        <img src={ASSETS.clinkDark} alt="" className="august-arrow august-arrow-mini" loading="eager" decoding="async" />
+        <img src={ASSETS.augustLine} alt="" className="august-line" loading="eager" decoding="async" />
+        <img src={ASSETS.augustFlowers} alt="" className="august-wood" loading="eager" decoding="async" data-scroll-motion="drift-left" />
 
         <p className="section-script section-script-dark">Наш</p>
         <h2 className="section-title section-title-dark">ИЮЛЬ</h2>
@@ -322,7 +364,7 @@ function AugustSection() {
           {AUGUST_DAYS.map((day, index) => (
             day === "18" ? (
               <span key={day} className="august-day august-day-heart">
-                <img src={ASSETS.augustHeart} alt="" loading="lazy" />
+                <img src={ASSETS.augustHeart} alt="" loading="eager" decoding="async" />
                 <span>{day}</span>
               </span>
             ) : (
@@ -361,16 +403,16 @@ function LocationSection() {
     <section className="invite-section section-green location-section reveal">
       <Divider src={ASSETS.tornCreamLarge} className="divider-top location-torn-top" />
       <div className="section-inner">
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-one" loading="lazy" data-scroll-motion="slide-right" />
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-two" loading="lazy" data-scroll-motion="slide-left" />
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-three" loading="lazy" data-scroll-motion="slide-right" />
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-four" loading="lazy" data-scroll-motion="slide-left" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-one" loading="eager" decoding="async" data-scroll-motion="slide-right" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-two" loading="eager" decoding="async" data-scroll-motion="slide-left" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-three" loading="eager" decoding="async" data-scroll-motion="slide-right" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-four" loading="eager" decoding="async" data-scroll-motion="slide-left" />
         <h2 className="mega-title">LOCA<br />TION</h2>
 
         <div className="location-block location-combined reveal reveal-up" style={{ "--reveal-delay": "80ms" }}>
           <h3>Регистрация<br />и банкет</h3>
           <p>Белый причал<br />деревня Михалево</p>
-          <img src={ASSETS.locationBeliyPrichal} alt="" className="location-photo location-photo-combined" loading="lazy" data-scroll-motion="drift-left" />
+          <img src={ASSETS.locationBeliyPrichal} alt="" className="location-photo location-photo-combined" loading="eager" decoding="async" data-scroll-motion="drift-left" />
           <a className="location-map-button" href="https://yandex.ru/maps/?text=%D0%91%D0%B5%D0%BB%D1%8B%D0%B9%20%D0%BF%D1%80%D0%B8%D1%87%D0%B0%D0%BB%20%D0%B4%D0%B5%D1%80%D0%B5%D0%B2%D0%BD%D1%8F%20%D0%9C%D0%B8%D1%85%D0%B0%D0%BB%D0%B5%D0%B2%D0%BE" target="_blank" rel="noreferrer">
             посмотреть на карте
           </a>
@@ -385,10 +427,10 @@ function DressCodeSection() {
     <section className="invite-section section-cream dress-section reveal">
       <Divider src={ASSETS.tornCreamTop} className="divider-top" />
       <div className="section-inner dress-inner">
-        <img src={ASSETS.dressBranchLeft} alt="" className="dress-branch dress-branch-left" loading="lazy" data-scroll-motion="drift-right" />
-        <img src={ASSETS.dressBranchRight} alt="" className="dress-branch dress-branch-right" loading="lazy" data-scroll-motion="drift-left" />
+        <img src={ASSETS.dressBranchLeft} alt="" className="dress-branch dress-branch-left" loading="eager" decoding="async" data-scroll-motion="drift-right" />
+        <img src={ASSETS.dressBranchRight} alt="" className="dress-branch dress-branch-right" loading="eager" decoding="async" data-scroll-motion="drift-left" />
         {SILK_SWATCHES.map((item) => (
-          <img key={item.className} src={item.src} alt="" className={item.className} loading="lazy" />
+          <img key={item.className} src={item.src} alt="" className={item.className} loading="eager" decoding="async" />
         ))}
 
         <p className="futura-kicker">code</p>
@@ -407,8 +449,8 @@ function DetailsSection() {
   return (
     <section className="invite-section section-green details-section reveal">
       <div className="section-inner">
-        <img src={ASSETS.starAlt} alt="" className="details-star" loading="lazy" data-scroll-motion="spin" />
-        <img src={ASSETS.dressBranchRight} alt="" className="details-branch" loading="lazy" data-scroll-motion="drift-left" />
+        <img src={ASSETS.starAlt} alt="" className="details-star" loading="eager" decoding="async" data-scroll-motion="spin" />
+        <img src={ASSETS.dressBranchRight} alt="" className="details-branch" loading="eager" decoding="async" data-scroll-motion="drift-left" />
         <h2 className="mega-title details-title">Details</h2>
         <div className="details-list">
           {DETAILS_NOTES.map((item) => (
@@ -457,7 +499,7 @@ function RsvpForm() {
 
   return (
     <section className="invite-section section-cream rsvp-section reveal">
-      <img src={ASSETS.shadowPalm} alt="" className="rsvp-shadow" loading="lazy" />
+      <img src={ASSETS.shadowPalm} alt="" className="rsvp-shadow" loading="eager" decoding="async" />
       <div className="section-inner">
         <p className="mega-title rsvp-title">анкета</p>
         <p className="section-copy section-copy-dark rsvp-copy">
@@ -527,16 +569,16 @@ function GuestChatSection() {
   return (
     <section className="invite-section section-green chat-section reveal">
       <div className="section-inner">
-        <img src={ASSETS.chatLeaf} alt="" className="chat-leaf" loading="lazy" data-scroll-motion="drift-right" />
+        <img src={ASSETS.chatLeaf} alt="" className="chat-leaf" loading="eager" decoding="async" data-scroll-motion="drift-right" />
         <h2 className="mega-title chat-title">Чат для<br />гостей</h2>
         <p className="section-copy chat-copy">
           Предлагаем вступить в чат гостей, здесь можно обмениваться фото и видео со свадьбы
         </p>
         <div className="chat-phone-wrap" data-scroll-motion="drift-left">
-          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-left" loading="lazy" />
-          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-right" loading="lazy" />
+          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-left" loading="eager" decoding="async" />
+          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-right" loading="eager" decoding="async" />
           <a href={TELEGRAM_CHAT_URL} target="_blank" rel="noreferrer" className="chat-phone-link" aria-label="Открыть чат гостей в Telegram">
-            <img src={ASSETS.guestPhone} alt="" className="chat-phone" loading="lazy" />
+            <img src={ASSETS.guestPhone} alt="" className="chat-phone" loading="eager" decoding="async" />
           </a>
         </div>
       </div>
@@ -568,7 +610,7 @@ function ContactsSection() {
           </div>
         </div>
 
-        <img src={ASSETS.contactsRock} alt="" className="contacts-rock" loading="lazy" data-scroll-motion="drift-left" />
+        <img src={ASSETS.contactsRock} alt="" className="contacts-rock" loading="eager" decoding="async" data-scroll-motion="drift-left" />
       </div>
     </section>
   );
@@ -606,7 +648,7 @@ function ClosingSection() {
       <div className="section-inner closing-inner">
         <p className="closing-caption reveal reveal-left" style={{ "--reveal-delay": "80ms" }}>С любовью,</p>
         <div className="closing-card reveal reveal-up" style={{ "--reveal-delay": "140ms" }}>
-          <img src={ASSETS.closingPhoto} alt="Даниил и Дарья" loading="lazy" />
+          <img src={ASSETS.closingPhoto} alt="Даниил и Дарья" loading="eager" decoding="async" />
           <p>До скорой встречи! ❤</p>
         </div>
         <p className="closing-sign reveal reveal-up" style={{ "--reveal-delay": "200ms" }}>Даниил & Дарья</p>
@@ -621,6 +663,7 @@ export default function App() {
   const isOpened = phase === "opened";
   useRevealOnScroll(isOpened);
   useScrollMotion(isOpened);
+  useImagePreloader(phase !== "closed");
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -646,18 +689,33 @@ export default function App() {
     };
   }, [phase]);
 
+  function playMusicFromEightSeconds() {
+    const music = musicRef.current;
+    if (!music) {
+      return;
+    }
+
+    const play = () => {
+      music.currentTime = 8;
+      music.volume = 0.75;
+      music.play().catch(() => undefined);
+    };
+
+    if (music.readyState >= 1) {
+      play();
+      return;
+    }
+
+    music.addEventListener("loadedmetadata", play, { once: true });
+    music.load();
+  }
+
   function handleOpen() {
     if (phase !== "closed") {
       return;
     }
 
-    const music = musicRef.current;
-    if (music) {
-      music.currentTime = 8;
-      music.volume = 0.75;
-      music.play().catch(() => undefined);
-    }
-
+    playMusicFromEightSeconds();
     setPhase("opening");
   }
 
