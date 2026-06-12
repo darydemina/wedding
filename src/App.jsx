@@ -45,16 +45,13 @@ const ASSETS = {
   guestPhone: "/assets/mirrored/images/iPhone_16_Pro-5590e1f81c.png",
   contactsRock: "/assets/mirrored/images/Frame_1321317423-b68f1e1403.png",
   closingPhoto: "/assets/custom/closing-couple.jpg",
-  weddingMusic: "/assets/custom/wedding-music.mp3",
+  weddingMusic: "/assets/custom/wedding-music-from-8.mp3",
 };
 
 const targetDate = new Date("2026-07-18T12:15:00+03:00");
 const ENVELOPE_OPEN_MS = 2000;
 const TELEGRAM_CHAT_URL = "https://t.me/+1oYKdaqk1NxlZWZi";
 const TELEGRAM_BOT_URL = "https://t.me/srm_list_bot";
-const MUSIC_START_SECONDS = 8;
-const MUSIC_SRC = `${ASSETS.weddingMusic}#t=${MUSIC_START_SECONDS}`;
-
 const AUGUST_DAYS = ["16", "17", "18", "19", "20"];
 
 const AUGUST_ITEMS = [
@@ -712,47 +709,19 @@ export default function App() {
     };
   }, [phase]);
 
-  function playMusicFromEightSeconds() {
+  function playMusic() {
     const music = musicRef.current;
     if (!music) {
       return;
     }
 
-    const seekToStart = () => {
-      try {
-        if (Math.abs(music.currentTime - MUSIC_START_SECONDS) > 0.2) {
-          music.currentTime = MUSIC_START_SECONDS;
-        }
-      } catch {
-        // Some mobile browsers reject seeking before metadata; the event listeners retry it.
-      }
-    };
-
-    const playFromEight = () => {
-      music.volume = 0.75;
-      seekToStart();
-
-      const playPromise = music.play();
-      if (playPromise) {
-        playPromise
-          .then(() => {
-            seekToStart();
-            window.setTimeout(seekToStart, 80);
-            window.setTimeout(seekToStart, 240);
-          })
-          .catch(() => undefined);
-      }
-    };
-
-    music.addEventListener("loadedmetadata", seekToStart, { once: true });
-    music.addEventListener("canplay", seekToStart, { once: true });
-    music.addEventListener("playing", seekToStart, { once: true });
-
-    playFromEight();
-
     if (music.readyState < 1) {
       music.load();
     }
+
+    music.currentTime = 0;
+    music.volume = 0.75;
+    music.play().catch(() => undefined);
   }
 
   function handleOpen() {
@@ -760,13 +729,13 @@ export default function App() {
       return;
     }
 
-    playMusicFromEightSeconds();
+    playMusic();
     setPhase("opening");
   }
 
   return (
     <main className={`app phase-${phase}`}>
-      <audio ref={musicRef} src={MUSIC_SRC} preload="auto" />
+      <audio ref={musicRef} src={ASSETS.weddingMusic} preload="auto" />
       <div className="page-shell">
         <Intro phase={phase} onOpen={handleOpen} />
         <DearSection />
