@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 
 const ASSETS = {
   meadow: "/assets/mirrored/images/Frame_1321317361_1-326d2f0e5f.png",
-  photoMaria: "/assets/custom/darya-fast.jpg",
-  photoAlexey: "/assets/custom/daniil.jpg",
+  photoMaria: "/assets/custom/darya-intro.jpg",
+  photoAlexey: "/assets/custom/daniil-intro.jpg",
   star: "/assets/mirrored/images/Star_1-8ad14f0585.svg",
   starAlt: "/assets/mirrored/images/Star_2-5efb369037.svg",
-  names: "/assets/custom/darya-daniil-names-transparent.png",
+  names: "/assets/custom/darya-daniil-names-intro.png",
   topFlap: "/assets/mirrored/images/Frame_1321317328-c51e1ec015.png",
   bottomFlap: "/assets/mirrored/images/Frame_1321317329-4d4fd1da66.png",
   glassLeft: "/assets/mirrored/images/1-86bc82f266.png",
@@ -220,28 +220,51 @@ function useImagePreloader(enabled) {
       return undefined;
     }
 
-    const handles = IMAGE_PRELOADS_AFTER_OPEN.map((src) => {
-      const image = new Image();
-      image.decoding = "async";
-      image.src = src;
-      return image;
+    const handles = [];
+    const timers = [];
+
+    IMAGE_PRELOADS_AFTER_OPEN.forEach((src, index) => {
+      const timer = window.setTimeout(() => {
+        const load = () => {
+          const image = new Image();
+          image.decoding = "async";
+          image.src = src;
+          handles.push(image);
+        };
+
+        if ("requestIdleCallback" in window) {
+          window.requestIdleCallback(load, { timeout: 900 });
+          return;
+        }
+
+        load();
+      }, index * 90);
+
+      timers.push(timer);
     });
 
     return () => {
+      timers.forEach((timer) => window.clearTimeout(timer));
       handles.length = 0;
     };
   }, [enabled]);
 }
 
+const lazyDecor = {
+  loading: "lazy",
+  decoding: "async",
+  fetchPriority: "low",
+};
+
 function Divider({ src, className = "" }) {
-  return <img className={`section-divider ${className}`.trim()} src={src} alt="" aria-hidden="true" loading="eager" decoding="async" fetchPriority="high" />;
+  return <img className={`section-divider ${className}`.trim()} src={src} alt="" aria-hidden="true" {...lazyDecor} />;
 }
 
 function DressDetailsTransition() {
   return (
     <section className="transition-strip dress-details-transition" aria-hidden="true">
       <span className="transition-fill" />
-      <img className="transition-image transition-dress-details" src={ASSETS.tornGreenTop} alt="" loading="eager" decoding="async" fetchPriority="high" />
+      <img className="transition-image transition-dress-details" src={ASSETS.tornGreenTop} alt="" {...lazyDecor} />
     </section>
   );
 }
@@ -249,8 +272,8 @@ function DressDetailsTransition() {
 function DetailsRsvpTransition() {
   return (
     <section className="transition-strip details-rsvp-transition" aria-hidden="true">
-      <img className="transition-shadow transition-rsvp-shadow" src={ASSETS.shadowPalm} alt="" loading="eager" decoding="async" fetchPriority="high" />
-      <img className="transition-image transition-details-rsvp" src={ASSETS.rsvpTorn} alt="" loading="eager" decoding="async" fetchPriority="high" />
+      <img className="transition-shadow transition-rsvp-shadow" src={ASSETS.shadowPalm} alt="" {...lazyDecor} />
+      <img className="transition-image transition-details-rsvp" src={ASSETS.rsvpTorn} alt="" {...lazyDecor} />
     </section>
   );
 }
@@ -263,9 +286,7 @@ function LeafTransition({ className = "", rotated = false, cream = false }) {
         className={`transition-image transition-leaf ${rotated ? "is-rotated" : ""}`.trim()}
         src={ASSETS.leafStrip}
         alt=""
-        loading="eager"
-        decoding="async"
-        fetchPriority="high"
+        {...lazyDecor}
       />
     </section>
   );
@@ -274,7 +295,7 @@ function LeafTransition({ className = "", rotated = false, cream = false }) {
 function RsvpChatTransition() {
   return (
     <section className="transition-strip rsvp-chat-transition" aria-hidden="true">
-      <img className="transition-image transition-rsvp-chat" src={ASSETS.tornCreamLarge} alt="" loading="eager" decoding="async" fetchPriority="high" />
+      <img className="transition-image transition-rsvp-chat" src={ASSETS.tornCreamLarge} alt="" {...lazyDecor} />
     </section>
   );
 }
@@ -283,7 +304,7 @@ function FinalCreamTransition() {
   return (
     <section className="transition-strip final-cream-transition" aria-hidden="true">
       <span className="transition-final-fill" />
-      <img className="transition-image transition-final-cream" src={ASSETS.tornCreamLarge} alt="" loading="eager" decoding="async" fetchPriority="high" />
+      <img className="transition-image transition-final-cream" src={ASSETS.tornCreamLarge} alt="" {...lazyDecor} />
     </section>
   );
 }
@@ -330,9 +351,9 @@ function DearSection() {
   return (
     <section id="odinstart" className="invite-section section-green dear-section reveal">
       <div className="dear-stage" aria-hidden="true">
-        <img src={ASSETS.starAlt} alt="" className="dear-star" loading="eager" decoding="async" data-scroll-motion="spin" />
-        <img src={ASSETS.glassLeft} alt="" className="dear-glass dear-glass-left" loading="eager" decoding="async" fetchPriority="high" data-scroll-motion="dear-left" />
-        <img src={ASSETS.glassRight} alt="" className="dear-glass dear-glass-right" loading="eager" decoding="async" fetchPriority="high" data-scroll-motion="dear-right" />
+        <img src={ASSETS.starAlt} alt="" className="dear-star" {...lazyDecor} data-scroll-motion="spin" />
+        <img src={ASSETS.glassLeft} alt="" className="dear-glass dear-glass-left" {...lazyDecor} data-scroll-motion="dear-left" />
+        <img src={ASSETS.glassRight} alt="" className="dear-glass dear-glass-right" {...lazyDecor} data-scroll-motion="dear-right" />
       </div>
       <div className="section-inner dear-copy-group">
         <p className="section-script">Дорогие</p>
@@ -351,11 +372,11 @@ function AugustSection() {
   return (
     <section className="invite-section section-cream august-section reveal">
       <Divider src={ASSETS.tornGreenTop} className="divider-top divider-top-green" />
-      <img src={ASSETS.augustBranch} alt="" className="august-branch" loading="eager" decoding="async" />
+      <img src={ASSETS.augustBranch} alt="" className="august-branch" {...lazyDecor} />
       <div className="section-inner">
-        <img src={ASSETS.clinkDark} alt="" className="august-arrow august-arrow-mini" loading="eager" decoding="async" />
-        <img src={ASSETS.augustLine} alt="" className="august-line" loading="eager" decoding="async" />
-        <img src={ASSETS.augustFlowers} alt="" className="august-wood" loading="eager" decoding="async" data-scroll-motion="drift-left" />
+        <img src={ASSETS.clinkDark} alt="" className="august-arrow august-arrow-mini" {...lazyDecor} />
+        <img src={ASSETS.augustLine} alt="" className="august-line" {...lazyDecor} />
+        <img src={ASSETS.augustFlowers} alt="" className="august-wood" {...lazyDecor} data-scroll-motion="drift-left" />
 
         <p className="section-script section-script-dark">Наш</p>
         <h2 className="section-title section-title-dark">ИЮЛЬ</h2>
@@ -364,7 +385,7 @@ function AugustSection() {
           {AUGUST_DAYS.map((day, index) => (
             day === "18" ? (
               <span key={day} className="august-day august-day-heart">
-                <img src={ASSETS.augustHeart} alt="" loading="eager" decoding="async" />
+                <img src={ASSETS.augustHeart} alt="" {...lazyDecor} />
                 <span>{day}</span>
               </span>
             ) : (
@@ -403,16 +424,16 @@ function LocationSection() {
     <section className="invite-section section-green location-section reveal">
       <Divider src={ASSETS.tornCreamLarge} className="divider-top location-torn-top" />
       <div className="section-inner">
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-one" loading="eager" decoding="async" data-scroll-motion="slide-right" />
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-two" loading="eager" decoding="async" data-scroll-motion="slide-left" />
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-three" loading="eager" decoding="async" data-scroll-motion="slide-right" />
-        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-four" loading="eager" decoding="async" data-scroll-motion="slide-left" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-one" {...lazyDecor} data-scroll-motion="slide-right" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-two" {...lazyDecor} data-scroll-motion="slide-left" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-three" {...lazyDecor} data-scroll-motion="slide-right" />
+        <img src={ASSETS.clinkLight} alt="" className="location-arrow location-arrow-four" {...lazyDecor} data-scroll-motion="slide-left" />
         <h2 className="mega-title">LOCA<br />TION</h2>
 
         <div className="location-block location-combined reveal reveal-up" style={{ "--reveal-delay": "80ms" }}>
           <h3>Регистрация<br />и банкет</h3>
           <p>Белый причал<br />деревня Михалево</p>
-          <img src={ASSETS.locationBeliyPrichal} alt="" className="location-photo location-photo-combined" loading="eager" decoding="async" data-scroll-motion="drift-left" />
+          <img src={ASSETS.locationBeliyPrichal} alt="" className="location-photo location-photo-combined" {...lazyDecor} data-scroll-motion="drift-left" />
           <a className="location-map-button" href="https://yandex.ru/maps/?text=%D0%91%D0%B5%D0%BB%D1%8B%D0%B9%20%D0%BF%D1%80%D0%B8%D1%87%D0%B0%D0%BB%20%D0%B4%D0%B5%D1%80%D0%B5%D0%B2%D0%BD%D1%8F%20%D0%9C%D0%B8%D1%85%D0%B0%D0%BB%D0%B5%D0%B2%D0%BE" target="_blank" rel="noreferrer">
             посмотреть на карте
           </a>
@@ -427,10 +448,10 @@ function DressCodeSection() {
     <section className="invite-section section-cream dress-section reveal">
       <Divider src={ASSETS.tornCreamTop} className="divider-top" />
       <div className="section-inner dress-inner">
-        <img src={ASSETS.dressBranchLeft} alt="" className="dress-branch dress-branch-left" loading="eager" decoding="async" data-scroll-motion="drift-right" />
-        <img src={ASSETS.dressBranchRight} alt="" className="dress-branch dress-branch-right" loading="eager" decoding="async" data-scroll-motion="drift-left" />
+        <img src={ASSETS.dressBranchLeft} alt="" className="dress-branch dress-branch-left" {...lazyDecor} data-scroll-motion="drift-right" />
+        <img src={ASSETS.dressBranchRight} alt="" className="dress-branch dress-branch-right" {...lazyDecor} data-scroll-motion="drift-left" />
         {SILK_SWATCHES.map((item) => (
-          <img key={item.className} src={item.src} alt="" className={item.className} loading="eager" decoding="async" />
+          <img key={item.className} src={item.src} alt="" className={item.className} {...lazyDecor} />
         ))}
 
         <p className="futura-kicker">code</p>
@@ -449,8 +470,8 @@ function DetailsSection() {
   return (
     <section className="invite-section section-green details-section reveal">
       <div className="section-inner">
-        <img src={ASSETS.starAlt} alt="" className="details-star" loading="eager" decoding="async" data-scroll-motion="spin" />
-        <img src={ASSETS.dressBranchRight} alt="" className="details-branch" loading="eager" decoding="async" data-scroll-motion="drift-left" />
+        <img src={ASSETS.starAlt} alt="" className="details-star" {...lazyDecor} data-scroll-motion="spin" />
+        <img src={ASSETS.dressBranchRight} alt="" className="details-branch" {...lazyDecor} data-scroll-motion="drift-left" />
         <h2 className="mega-title details-title">Details</h2>
         <div className="details-list">
           {DETAILS_NOTES.map((item) => (
@@ -499,7 +520,7 @@ function RsvpForm() {
 
   return (
     <section className="invite-section section-cream rsvp-section reveal">
-      <img src={ASSETS.shadowPalm} alt="" className="rsvp-shadow" loading="eager" decoding="async" />
+      <img src={ASSETS.shadowPalm} alt="" className="rsvp-shadow" {...lazyDecor} />
       <div className="section-inner">
         <p className="mega-title rsvp-title">анкета</p>
         <p className="section-copy section-copy-dark rsvp-copy">
@@ -569,16 +590,16 @@ function GuestChatSection() {
   return (
     <section className="invite-section section-green chat-section reveal">
       <div className="section-inner">
-        <img src={ASSETS.chatLeaf} alt="" className="chat-leaf" loading="eager" decoding="async" data-scroll-motion="drift-right" />
+        <img src={ASSETS.chatLeaf} alt="" className="chat-leaf" {...lazyDecor} data-scroll-motion="drift-right" />
         <h2 className="mega-title chat-title">Чат для<br />гостей</h2>
         <p className="section-copy chat-copy">
           Предлагаем вступить в чат гостей, здесь можно обмениваться фото и видео со свадьбы
         </p>
         <div className="chat-phone-wrap" data-scroll-motion="drift-left">
-          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-left" loading="eager" decoding="async" />
-          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-right" loading="eager" decoding="async" />
+          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-left" {...lazyDecor} />
+          <img src={ASSETS.chatLeaf} alt="" className="chat-phone-branch chat-phone-branch-right" {...lazyDecor} />
           <a href={TELEGRAM_CHAT_URL} target="_blank" rel="noreferrer" className="chat-phone-link" aria-label="Открыть чат гостей в Telegram">
-            <img src={ASSETS.guestPhone} alt="" className="chat-phone" loading="eager" decoding="async" />
+            <img src={ASSETS.guestPhone} alt="" className="chat-phone" {...lazyDecor} />
           </a>
         </div>
       </div>
@@ -610,7 +631,7 @@ function ContactsSection() {
           </div>
         </div>
 
-        <img src={ASSETS.contactsRock} alt="" className="contacts-rock" loading="eager" decoding="async" data-scroll-motion="drift-left" />
+        <img src={ASSETS.contactsRock} alt="" className="contacts-rock" {...lazyDecor} data-scroll-motion="drift-left" />
       </div>
     </section>
   );
@@ -648,7 +669,7 @@ function ClosingSection() {
       <div className="section-inner closing-inner">
         <p className="closing-caption reveal reveal-left" style={{ "--reveal-delay": "80ms" }}>С любовью,</p>
         <div className="closing-card reveal reveal-up" style={{ "--reveal-delay": "140ms" }}>
-          <img src={ASSETS.closingPhoto} alt="Даниил и Дарья" loading="eager" decoding="async" />
+          <img src={ASSETS.closingPhoto} alt="Даниил и Дарья" {...lazyDecor} />
           <p>До скорой встречи! ❤</p>
         </div>
         <p className="closing-sign reveal reveal-up" style={{ "--reveal-delay": "200ms" }}>Даниил & Дарья</p>
@@ -695,19 +716,36 @@ export default function App() {
       return;
     }
 
-    const play = () => {
-      music.currentTime = 8;
-      music.volume = 0.75;
-      music.play().catch(() => undefined);
+    const seekToStart = () => {
+      if (Number.isFinite(music.duration) && music.duration > 8) {
+        music.currentTime = 8;
+      }
     };
 
-    if (music.readyState >= 1) {
-      play();
-      return;
-    }
+    const playFromEight = () => {
+      music.volume = 0.75;
+      seekToStart();
 
-    music.addEventListener("loadedmetadata", play, { once: true });
-    music.load();
+      const playPromise = music.play();
+      if (playPromise) {
+        playPromise
+          .then(() => {
+            seekToStart();
+            window.setTimeout(seekToStart, 80);
+          })
+          .catch(() => undefined);
+      }
+    };
+
+    music.addEventListener("loadedmetadata", seekToStart, { once: true });
+    music.addEventListener("canplay", seekToStart, { once: true });
+    music.addEventListener("playing", seekToStart, { once: true });
+
+    playFromEight();
+
+    if (music.readyState < 1) {
+      music.load();
+    }
   }
 
   function handleOpen() {
