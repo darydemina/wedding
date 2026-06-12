@@ -338,6 +338,8 @@ function Intro({ phase, onOpen }) {
           className="seal-hit"
           type="button"
           aria-label="Открыть приглашение"
+          onPointerDown={onOpen}
+          onTouchStart={onOpen}
           onClick={onOpen}
           disabled={phase !== "closed"}
         />
@@ -680,6 +682,7 @@ function ClosingSection() {
 export default function App() {
   const [phase, setPhase] = useState("closed");
   const musicRef = useRef(null);
+  const openStartedRef = useRef(false);
   const isOpened = phase === "opened";
   useRevealOnScroll(isOpened);
   useScrollMotion(isOpened);
@@ -687,6 +690,11 @@ export default function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
+    fetch(ASSETS.weddingMusic, { cache: "force-cache" }).catch(() => undefined);
+    musicRef.current?.load();
   }, []);
 
   useEffect(() => {
@@ -725,10 +733,11 @@ export default function App() {
   }
 
   function handleOpen() {
-    if (phase !== "closed") {
+    if (openStartedRef.current || phase !== "closed") {
       return;
     }
 
+    openStartedRef.current = true;
     playMusic();
     setPhase("opening");
   }
