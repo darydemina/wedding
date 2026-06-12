@@ -52,6 +52,8 @@ const targetDate = new Date("2026-07-18T12:15:00+03:00");
 const ENVELOPE_OPEN_MS = 2000;
 const TELEGRAM_CHAT_URL = "https://t.me/+1oYKdaqk1NxlZWZi";
 const TELEGRAM_BOT_URL = "https://t.me/srm_list_bot";
+const MUSIC_START_SECONDS = 8;
+const MUSIC_SRC = `${ASSETS.weddingMusic}#t=${MUSIC_START_SECONDS}`;
 
 const AUGUST_DAYS = ["16", "17", "18", "19", "20"];
 
@@ -717,8 +719,12 @@ export default function App() {
     }
 
     const seekToStart = () => {
-      if (Number.isFinite(music.duration) && music.duration > 8) {
-        music.currentTime = 8;
+      try {
+        if (Math.abs(music.currentTime - MUSIC_START_SECONDS) > 0.2) {
+          music.currentTime = MUSIC_START_SECONDS;
+        }
+      } catch {
+        // Some mobile browsers reject seeking before metadata; the event listeners retry it.
       }
     };
 
@@ -732,6 +738,7 @@ export default function App() {
           .then(() => {
             seekToStart();
             window.setTimeout(seekToStart, 80);
+            window.setTimeout(seekToStart, 240);
           })
           .catch(() => undefined);
       }
@@ -759,7 +766,7 @@ export default function App() {
 
   return (
     <main className={`app phase-${phase}`}>
-      <audio ref={musicRef} src={ASSETS.weddingMusic} preload="auto" />
+      <audio ref={musicRef} src={MUSIC_SRC} preload="auto" />
       <div className="page-shell">
         <Intro phase={phase} onOpen={handleOpen} />
         <DearSection />
